@@ -1,11 +1,11 @@
 # Maven wrapper
 /.mvn/wrapper/maven-wrapper.jar
-# InjelliJ IDEA
+# IntelliJ IDEA
 /.idea/
 *.iml
 # Eclipse
 /.project/
 /.classpath
 # Build
-.flattened-pom.xml
+dependency-reduced-pom.xml
 target/

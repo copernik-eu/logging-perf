@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2024 Piotr P. Karwasz
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!DOCTYPE configuration>
+<configuration>
+    <import class="ch.qos.logback.classic.AsyncAppender"/>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="eu.copernik.logging.perf.logback.LogbackCountingAppender"/>
+
+    <appender name="COUNTING" class="LogbackCountingAppender">
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d [%t] %p %c - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="AsyncAppender">
+        <neverBlock>false</neverBlock>
+        <queueSize>${log4j2.asyncLoggerRingBufferSize}</queueSize>
+        <appender-ref ref="COUNTING"/>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="ASYNC"/>
+    </root>
+</configuration>

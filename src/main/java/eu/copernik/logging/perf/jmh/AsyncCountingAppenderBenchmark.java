@@ -21,10 +21,12 @@ import eu.copernik.logging.perf.logback.LogbackCountingAppender;
 import eu.copernik.logging.perf.reload4j.Reload4jCountingAppender;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 import org.jboss.logmanager.LogContext;
 import org.jboss.logmanager.configuration.PropertyLogContextConfigurator;
 import org.jboss.logmanager.handlers.AsyncHandler;
+import org.openjdk.jmh.annotations.AuxCounters;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
@@ -34,7 +36,6 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.infra.BenchmarkParams;
 
 @State(Scope.Thread)
@@ -42,7 +43,6 @@ public class AsyncCountingAppenderBenchmark {
 
     private static final String MESSAGE = "This is a `DEBUG` message.";
     private static final String FQCN = "eu.copernik.logging.perf.jmh.AsyncCountingAppenderBenchmark";
-    private static final double MEBI = 1024 * 1024;
     private org.jboss.logging.Logger jbossLogger;
     private org.apache.logging.log4j.Logger log4jLogger;
     private org.apache.log4j.Logger reload4jLogger;
@@ -91,22 +91,22 @@ public class AsyncCountingAppenderBenchmark {
         }
     }
 
-    @TearDown(Level.Iteration)
-    public void printByteCount(BenchmarkParams params) {
-        long seconds = params.getMeasurement().getTime().convertTo(TimeUnit.SECONDS);
+    @Setup(Level.Iteration)
+    public void setupByteCounter(BenchmarkParams params, ByteCounter byteCounter) {
+        String threadName = Thread.currentThread().getName();
         switch (params.getBenchmark()) {
             case FQCN + ".jboss":
                 AsyncHandler asyncHandler = (AsyncHandler) Logger.getLogger("").getHandlers()[0];
                 JBossCountingHandler countingHandler =
                         (JBossCountingHandler) asyncHandler.getHandlers()[0];
-                System.err.printf("%4.2f MiB/s,%n", countingHandler.resetByteCount() / MEBI / seconds);
+                byteCounter.counter = countingHandler.getCounter(threadName);
                 break;
             case FQCN + ".log4jAsyncAppender":
             case FQCN + ".log4jAsyncLogger":
                 Log4jCountingAppender log4jAppender = org.apache.logging.log4j.core.LoggerContext.getContext(false)
                         .getConfiguration()
                         .getAppender("COUNTING");
-                System.err.printf("%4.2f MiB/s,%n", log4jAppender.resetByteCount() / MEBI / seconds);
+                byteCounter.counter = log4jAppender.getCounter(threadName);
                 break;
             case FQCN + ".logback":
                 ch.qos.logback.classic.AsyncAppender logbackAsyncAppender =
@@ -115,14 +115,14 @@ public class AsyncCountingAppenderBenchmark {
                                 .getAppender("ASYNC");
                 LogbackCountingAppender logbackCountingAppender =
                         (LogbackCountingAppender) logbackAsyncAppender.getAppender("COUNTING");
-                System.err.printf("%4.2f MiB/s,%n", logbackCountingAppender.resetByteCount() / MEBI / seconds);
+                byteCounter.counter = logbackCountingAppender.getCounter(threadName);
                 break;
             case FQCN + ".reload4j":
                 org.apache.log4j.AsyncAppender reload4jAsyncAppender = (org.apache.log4j.AsyncAppender)
                         org.apache.log4j.Logger.getRootLogger().getAppender("ASYNC");
                 Reload4jCountingAppender reload4jCountingAppender =
                         (Reload4jCountingAppender) reload4jAsyncAppender.getAppender("COUNTING");
-                System.err.printf("%4.2f MiB/s,%n", reload4jCountingAppender.resetByteCount() / MEBI / seconds);
+                byteCounter.counter = reload4jCountingAppender.getCounter(threadName);
                 break;
         }
     }
@@ -160,5 +160,16 @@ public class AsyncCountingAppenderBenchmark {
     @OutputTimeUnit(TimeUnit.SECONDS)
     public void reload4j() {
         reload4jLogger.debug(MESSAGE);
+    }
+
+    @AuxCounters
+    @State(Scope.Thread)
+    public static class ByteCounter {
+
+        private AtomicLong counter;
+
+        public double megabytes() {
+            return counter != null ? counter.getAndSet(0) / 1_000_000.0 : 0.0;
+        }
     }
 }

@@ -16,6 +16,8 @@
 package eu.copernik.logging.perf.log4j;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -39,7 +41,8 @@ public class Log4jCountingAppender extends AbstractAppender implements ByteBuffe
     }
 
     private final ByteBuffer byteBuffer = ByteBuffer.allocate(Constants.ENCODER_BYTE_BUFFER_SIZE);
-    private final AtomicLong byteCounter = new AtomicLong();
+    private final Map<String, AtomicLong> countersByThread = new ConcurrentHashMap<>();
+    private volatile AtomicLong counter;
 
     private Log4jCountingAppender(String name, Layout<String> layout) {
         super(name, null, layout, true, null);
@@ -47,12 +50,14 @@ public class Log4jCountingAppender extends AbstractAppender implements ByteBuffe
 
     @Override
     public void append(LogEvent event) {
+        counter = getCounter(event.getThreadName());
         if (Constants.ENABLE_DIRECT_ENCODERS) {
             getLayout().encode(event, this);
             drain(byteBuffer);
         } else {
-            byteCounter.addAndGet(getLayout().toByteArray(event).length);
+            counter.addAndGet(getLayout().toByteArray(event).length);
         }
+        counter = null;
     }
 
     @Override
@@ -63,22 +68,22 @@ public class Log4jCountingAppender extends AbstractAppender implements ByteBuffe
     @Override
     public ByteBuffer drain(ByteBuffer buf) {
         buf.flip();
-        byteCounter.addAndGet(buf.remaining());
+        counter.addAndGet(buf.remaining());
         buf.clear();
         return buf;
     }
 
     @Override
     public void writeBytes(ByteBuffer data) {
-        byteCounter.addAndGet(data.remaining());
+        counter.addAndGet(data.remaining());
     }
 
     @Override
     public void writeBytes(byte[] data, int offset, int length) {
-        byteCounter.addAndGet(length);
+        counter.addAndGet(length);
     }
 
-    public long resetByteCount() {
-        return byteCounter.getAndSet(0);
+    public AtomicLong getCounter(String threadName) {
+        return countersByThread.computeIfAbsent(threadName, ignored -> new AtomicLong());
     }
 }

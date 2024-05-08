@@ -56,7 +56,8 @@ public class AsyncCountingAppenderBenchmark {
         String benchmark = params.getBenchmark();
 
         // Common
-        System.setProperty("log4j2.asyncLoggerRingBufferSize", Integer.toString(bufferSize));
+        final String bufferSize = Integer.toString(this.bufferSize);
+        System.setProperty("benchmark.bufferSize", bufferSize);
 
         switch (benchmark) {
             case FQCN + ".jboss":
@@ -70,14 +71,17 @@ public class AsyncCountingAppenderBenchmark {
                 break;
             case FQCN + ".log4jAsyncAppender":
                 System.setProperty(
-                        "log4j2.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncAppender.xml");
+                        "log4j.configuration.location", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncAppender.xml");
                 log4jLogger = org.apache.logging.log4j.LogManager.getLogger();
                 break;
             case FQCN + ".log4jAsyncLogger":
                 System.setProperty(
-                        "log4j2.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncLogger.xml");
+                        "log4j.configuration.location", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncLogger.xml");
                 System.setProperty(
-                        "log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+                        "log4j.loggerContext.selector",
+                        "org.apache.logging.log4j.async.logger.AsyncLoggerContextSelector");
+                System.setProperty("log4j.async.logger.ringBuffer.size", bufferSize);
+                System.setProperty("log4j.async.logger.waitStrategy.type", "YIELD");
                 log4jLogger = org.apache.logging.log4j.LogManager.getLogger();
                 break;
             case FQCN + ".logback":
@@ -125,6 +129,7 @@ public class AsyncCountingAppenderBenchmark {
                 byteCounter.counter = reload4jCountingAppender.getCounter(threadName);
                 break;
         }
+        byteCounter.counter.getAndSet(0L);
     }
 
     @Benchmark

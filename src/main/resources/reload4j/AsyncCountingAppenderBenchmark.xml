@@ -22,7 +22,7 @@
         </layout>
     </appender>
     <appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
-        <param name="bufferSize" value="${log4j2.asyncLoggerRingBufferSize}"/>
+        <param name="bufferSize" value="${benchmark.bufferSize}"/>
         <appender-ref ref="COUNTING"/>
     </appender>
     <root>

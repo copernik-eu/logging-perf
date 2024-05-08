@@ -23,7 +23,7 @@
         <Counting name="COUNTING">
             <PatternLayout pattern="%d [%t] %p %c - %m%n"/>
         </Counting>
-        <Async name="ASYNC" bufferSize="${sys:log4j2.asyncLoggerRingBufferSize}">
+        <Async name="ASYNC" bufferSize="${sys:benchmark.bufferSize}">
             <AppenderRef ref="COUNTING"/>
         </Async>
     </Appenders>

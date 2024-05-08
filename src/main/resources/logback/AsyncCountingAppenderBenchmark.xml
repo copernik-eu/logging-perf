@@ -28,7 +28,7 @@
 
     <appender name="ASYNC" class="AsyncAppender">
         <discardingThreshold>0</discardingThreshold>
-        <queueSize>${log4j2.asyncLoggerRingBufferSize}</queueSize>
+        <queueSize>${benchmark.bufferSize}</queueSize>
         <appender-ref ref="COUNTING"/>
     </appender>
 

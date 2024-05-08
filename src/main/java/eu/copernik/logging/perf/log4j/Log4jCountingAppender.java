@@ -22,21 +22,22 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
-import org.apache.logging.log4j.core.config.Node;
-import org.apache.logging.log4j.core.config.plugins.Plugin;
-import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
-import org.apache.logging.log4j.core.config.plugins.PluginElement;
-import org.apache.logging.log4j.core.config.plugins.PluginFactory;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.util.Constants;
+import org.apache.logging.log4j.plugins.Configurable;
+import org.apache.logging.log4j.plugins.Factory;
+import org.apache.logging.log4j.plugins.Plugin;
+import org.apache.logging.log4j.plugins.PluginAttribute;
+import org.apache.logging.log4j.plugins.PluginElement;
+import org.apache.logging.log4j.plugins.validation.constraints.Required;
 
-@Plugin(name = "Counting", category = Node.CATEGORY)
-public class Log4jCountingAppender extends AbstractAppender implements ByteBufferDestination {
+@Plugin("Counting")
+@Configurable
+public final class Log4jCountingAppender extends AbstractAppender implements ByteBufferDestination {
 
-    @PluginFactory
+    @Factory
     public static Log4jCountingAppender create(
-            @PluginAttribute("name") @Required String name, @PluginElement("layout") @Required Layout<String> layout) {
+            @PluginAttribute("name") @Required String name, @PluginElement("layout") @Required Layout layout) {
         return new Log4jCountingAppender(name, layout);
     }
 
@@ -44,7 +45,7 @@ public class Log4jCountingAppender extends AbstractAppender implements ByteBuffe
     private final Map<String, AtomicLong> countersByThread = new ConcurrentHashMap<>();
     private volatile AtomicLong counter;
 
-    private Log4jCountingAppender(String name, Layout<String> layout) {
+    private Log4jCountingAppender(String name, Layout layout) {
         super(name, null, layout, true, null);
     }
 

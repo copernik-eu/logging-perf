@@ -78,13 +78,33 @@
     <!-- Dependency versions -->
     <jboss.version>3.0.6.Final</jboss.version>
     <jmh.version>1.37</jmh.version>
-    <log4j.version>2.23.1</log4j.version>
+    <log4j.version>3.0.0-SNAPSHOT</log4j.version>
     <logback.version>1.5.6</logback.version>
     <reload4j.version>1.2.25</reload4j.version>
 
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>${log4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
+
+    <dependency>
+      <groupId>biz.aQute.bnd</groupId>
+      <artifactId>biz.aQute.bnd.annotation</artifactId>
+      <version>7.0.0</version>
+    </dependency>
 
     <dependency>
       <groupId>org.jboss.logmanager</groupId>
@@ -101,7 +121,6 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
     </dependency>
 
     <dependency>
@@ -117,6 +136,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-async-logger</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>com.lmax</groupId>
       <artifactId>disruptor</artifactId>
       <version>4.0.0</version>
@@ -124,6 +149,17 @@
     </dependency>
 
   </dependencies>
+
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>https://repository.apache.org/content/groups/snapshots</url>
+    </repository>
+  </repositories>
 
   <build>
 
@@ -178,7 +214,7 @@
           <annotationProcessorPaths>
             <processorPath>
               <groupId>org.apache.logging.log4j</groupId>
-              <artifactId>log4j-core</artifactId>
+              <artifactId>log4j-plugin-processor</artifactId>
               <version>${log4j.version}</version>
             </processorPath>
             <processorPath>

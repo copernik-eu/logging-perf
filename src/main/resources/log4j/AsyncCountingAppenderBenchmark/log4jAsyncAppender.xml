@@ -21,7 +21,8 @@
                        https://logging.apache.org/xml/ns/log4j-config-2.xsd">
     <Appenders>
         <Counting name="COUNTING">
-            <PatternLayout pattern="%d [%t] %p %c - %m%n"/>
+            <!-- Should give exactly 218 bytes per log event -->
+            <PatternLayout pattern="%d [%96t] %p %c - %m%n"/>
         </Counting>
         <Async name="ASYNC" bufferSize="${sys:benchmark.bufferSize}">
             <AppenderRef ref="COUNTING"/>

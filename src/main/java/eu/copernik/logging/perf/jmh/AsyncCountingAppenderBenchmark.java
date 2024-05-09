@@ -46,8 +46,9 @@ public class AsyncCountingAppenderBenchmark {
     private static final String FQCN = "eu.copernik.logging.perf.jmh.AsyncCountingAppenderBenchmark";
     private static final String BENCHMARK_JBOSS = FQCN + ".jboss";
     private static final String BENCHMARK_LOG4J_ASYNC_APPENDER = FQCN + ".log4jAsyncAppender";
-    private static final String BENCHMARK_LOG4J_ASYNC_LOGGER = FQCN + ".log4jAsyncLogger";
-    private static final String BENCHMARK_LOGBACK = FQCN + ".logback";
+    private static final String BENCHMARK_LOG4J_DISRUPTOR = FQCN + ".log4jDisruptor";
+    private static final String BENCHMARK_LOGBACK_ASYNC_APPENDER = FQCN + ".logbackAsyncAppender";
+    private static final String BENCHMARK_LOGBACK_DISRUPTOR = FQCN + ".logbackDisruptor";
     private static final String BENCHMARK_RELOAD4J = FQCN + ".reload4j";
 
     private org.jboss.logging.Logger jbossLogger;
@@ -81,17 +82,23 @@ public class AsyncCountingAppenderBenchmark {
                         "log4j2.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncAppender.xml");
                 log4jLogger = org.apache.logging.log4j.LogManager.getLogger(FQCN);
                 break;
-            case BENCHMARK_LOG4J_ASYNC_LOGGER:
+            case BENCHMARK_LOG4J_DISRUPTOR:
                 System.setProperty(
-                        "log4j.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncLogger.xml");
+                        "log4j.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jDisruptor.xml");
                 System.setProperty(
                         "log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
                 System.setProperty("log4j2.asyncLoggerRingBufferSize", bufferSize);
                 System.setProperty("log4j2.asyncLoggerWaitStrategy", "YIELD");
                 log4jLogger = org.apache.logging.log4j.LogManager.getLogger(FQCN);
                 break;
-            case BENCHMARK_LOGBACK:
-                System.setProperty("logback.configurationFile", "logback/AsyncCountingAppenderBenchmark.xml");
+            case BENCHMARK_LOGBACK_ASYNC_APPENDER:
+                System.setProperty(
+                        "logback.configurationFile", "logback/AsyncCountingAppenderBenchmark/logbackAsyncAppender.xml");
+                slf4jLogger = org.slf4j.LoggerFactory.getLogger(FQCN);
+                break;
+            case BENCHMARK_LOGBACK_DISRUPTOR:
+                System.setProperty(
+                        "logback.configurationFile", "logback/AsyncCountingAppenderBenchmark/logbackDisruptor.xml");
                 slf4jLogger = org.slf4j.LoggerFactory.getLogger(FQCN);
                 break;
             case BENCHMARK_RELOAD4J:
@@ -112,15 +119,16 @@ public class AsyncCountingAppenderBenchmark {
                 byteCounter.counter = countingHandler.getCounter(threadName);
                 break;
             case BENCHMARK_LOG4J_ASYNC_APPENDER:
-            case BENCHMARK_LOG4J_ASYNC_LOGGER:
+            case BENCHMARK_LOG4J_DISRUPTOR:
                 Log4jCountingAppender log4jAppender = org.apache.logging.log4j.core.LoggerContext.getContext(false)
                         .getConfiguration()
                         .getAppender("COUNTING");
                 byteCounter.counter = log4jAppender.getCounter(threadName);
                 break;
-            case BENCHMARK_LOGBACK:
-                ch.qos.logback.classic.AsyncAppender logbackAsyncAppender =
-                        (ch.qos.logback.classic.AsyncAppender) ((ch.qos.logback.classic.Logger)
+            case BENCHMARK_LOGBACK_ASYNC_APPENDER:
+            case BENCHMARK_LOGBACK_DISRUPTOR:
+                ch.qos.logback.core.spi.AppenderAttachable<?> logbackAsyncAppender =
+                        (ch.qos.logback.core.spi.AppenderAttachable<?>) ((ch.qos.logback.classic.Logger)
                                         org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME))
                                 .getAppender("ASYNC");
                 LogbackCountingAppender logbackCountingAppender =
@@ -155,14 +163,21 @@ public class AsyncCountingAppenderBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void log4jAsyncLogger() {
+    public void log4jDisruptor() {
         log4jLogger.debug(MESSAGE);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void logback() {
+    public void logbackAsyncAppender() {
+        slf4jLogger.debug(MESSAGE);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.SECONDS)
+    public void logbackDisruptor() {
         slf4jLogger.debug(MESSAGE);
     }
 

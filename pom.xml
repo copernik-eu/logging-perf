@@ -111,6 +111,13 @@
     </dependency>
 
     <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <version>7.4</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>ch.qos.reload4j</groupId>
       <artifactId>reload4j</artifactId>
       <version>${reload4j.version}</version>
@@ -187,6 +194,7 @@
               <version>${jmh.version}</version>
             </processorPath>
           </annotationProcessorPaths>
+          <release>17</release>
         </configuration>
       </plugin>
 
@@ -215,6 +223,7 @@
                     <exclude>module-info.class</exclude>
                     <exclude>META-INF/DEPENDENCIES</exclude>
                     <exclude>META-INF/MANIFEST.MF</exclude>
+                    <exclude>META-INF/versions/9/module-info.class</exclude>
                   </excludes>
                 </filter>
               </filters>

@@ -22,7 +22,8 @@
 
     <appender name="COUNTING" class="LogbackCountingAppender">
         <encoder class="PatternLayoutEncoder">
-            <pattern>%d [%t] %p %c - %m%n</pattern>
+            <!-- Should give exactly 218 bytes per log event -->
+            <pattern>%d [%96t] %p %c - %m%n</pattern>
         </encoder>
     </appender>
 

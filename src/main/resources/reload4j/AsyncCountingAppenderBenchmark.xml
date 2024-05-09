@@ -18,7 +18,8 @@
 <log4j:configuration>
     <appender name="COUNTING" class="eu.copernik.logging.perf.reload4j.Reload4jCountingAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d %-5p [%t] %c %m%n"/>
+            <!-- Should give exactly 218 bytes per log event -->
+            <param name="ConversionPattern" value="%d [%96t] %p %c - %m%n"/>
         </layout>
     </appender>
     <appender name="ASYNC" class="org.apache.log4j.AsyncAppender">

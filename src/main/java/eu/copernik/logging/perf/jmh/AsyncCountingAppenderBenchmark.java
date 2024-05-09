@@ -63,7 +63,8 @@ public class AsyncCountingAppenderBenchmark {
         String benchmark = params.getBenchmark();
 
         // Common
-        System.setProperty("log4j2.asyncLoggerRingBufferSize", Integer.toString(bufferSize));
+        final String bufferSize = Integer.toString(this.bufferSize);
+        System.setProperty("benchmark.bufferSize", bufferSize);
 
         switch (benchmark) {
             case BENCHMARK_JBOSS:
@@ -85,8 +86,9 @@ public class AsyncCountingAppenderBenchmark {
                         "log4j.configurationFile", "log4j/AsyncCountingAppenderBenchmark/log4jAsyncLogger.xml");
                 System.setProperty(
                         "log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+                System.setProperty("log4j2.asyncLoggerRingBufferSize", bufferSize);
                 System.setProperty("log4j2.asyncLoggerWaitStrategy", "YIELD");
-                log4jLogger = org.apache.logging.log4j.LogManager.getLogger();
+                log4jLogger = org.apache.logging.log4j.LogManager.getLogger(FQCN);
                 break;
             case BENCHMARK_LOGBACK:
                 System.setProperty("logback.configurationFile", "logback/AsyncCountingAppenderBenchmark.xml");

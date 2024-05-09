@@ -24,7 +24,7 @@
             <!-- Should give exactly 218 bytes per log event -->
             <PatternLayout pattern="%d [%96t] %p %c - %m%n"/>
         </Counting>
-        <Async name="ASYNC" bufferSize="${sys:log4j2.asyncLoggerRingBufferSize}">
+        <Async name="ASYNC" bufferSize="${sys:benchmark.bufferSize}">
             <AppenderRef ref="COUNTING"/>
         </Async>
     </Appenders>
